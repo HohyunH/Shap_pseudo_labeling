@@ -17,7 +17,7 @@ nltk.download('stopwords')
 from dataset import *
 
 
-def train(epochs, model, optimizer, train_loader, tokenizer, pl=False):
+def train(epochs, model, optimizer, train_loader, tokenizer, device, pl=False):
     itr = 1
     p_itr = 100
     total_loss = 0
@@ -63,7 +63,7 @@ def train(epochs, model, optimizer, train_loader, tokenizer, pl=False):
 
         torch.save(model.state_dict(), './distill_bert.pth')
 
-def evaluate(model, eval_loader, tokenizer):
+def evaluate(model, eval_loader, tokenizer, device):
     model.eval()
 
     total_len = 0
@@ -122,8 +122,8 @@ def main():
 
     optimizer = Adam(model.parameters(), lr=1e-6)
 
-    train(5, model, optimizer, train_loader, tokenizer)
-    evaluate(model, eval_loader, tokenizer)
+    train(5, model, optimizer, train_loader, tokenizer, device)
+    evaluate(model, eval_loader, tokenizer, device)
 
 if __name__ == '__main__':
     main()
