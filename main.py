@@ -46,7 +46,7 @@ def check_shap(df, index_list:list):
 
     return shap_dict
 
-def evaluate(model, eval_loader, tokenizer):
+def evaluate(model, eval_loader, tokenizer, device):
     model.eval()
 
     total_len = 0
@@ -254,13 +254,21 @@ if __name__=="__main__":
     optimizer = Adam(model.parameters(), lr=1e-6)
     epochs = 5
 
+    nsmc_eval_dataset = BinaryDataset(val_df)
+    eval_loader = DataLoader(nsmc_eval_dataset, batch_size=2, shuffle=False, num_workers=2)
+
     for test_step in range(int(len(test_df)/1000)):
 
         tests_df = test_split(test_step, test_df)
 
         extract_df, p_under = extract_data(tests_df)
+        test_df = pd.concat([test_df])
 
-        train(epochs, model, optimizer, train_loader, tokenizer, device, str(test_step), pl=False)
+        extract_dataset = BinaryDataset(extract_df)
+        p_train_loader = DataLoader(extract_dataset, batch_size=2, shuffle=False, num_workers=2)
+
+        train(epochs, model, optimizer, p_train_loader, tokenizer, device, str(test_step), pl=False)
+        evaluate(model, eval_loader, tokenizer, device)
 
         model.zero_grad()
 
