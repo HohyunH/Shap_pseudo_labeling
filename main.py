@@ -2,7 +2,7 @@ import shap
 import scipy as sp
 import numpy as np
 import pandas as pd
-from tqdm import tqdm, tqdm_notebook
+from tqdm import tqdm
 
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -78,7 +78,7 @@ def in_testing(model, eval_loader, tokenizer, device, thres : float):
     over_label = []
     idx = 0
     with torch.no_grad():
-        for text, label in tqdm_notebook(eval_loader):
+        for text, label in tqdm(eval_loader):
             encoded_list = [tokenizer.encode(t, add_special_tokens=True) for t in text]
             padded_list = [e[:512] + [0] * (512 - len(e)) for e in encoded_list]
             sample = torch.tensor(padded_list)
@@ -93,9 +93,9 @@ def in_testing(model, eval_loader, tokenizer, device, thres : float):
             total_len += len(labels)
             bool_list =  torch.max(F.softmax(logits), dim=1)[0].ge(thres)
             # print(bool_list)
-            over_thres.extend([i+idx for i, tr in enumerate(bool_list) if tr == True])
-            over_label.extend([pred[i] for i, tr in enumerate(bool_list) if tr == True])
-            under_thres.extend([j+idx for j,fa in enumerate(bool_list) if fa == False])
+            over_thres.extend([i+idx for i, tr in enumerate(bool_list) if tr==True])
+            over_label.extend([pred[i] for i, tr in enumerate(bool_list) if tr==True])
+            under_thres.extend([j+idx for j, fa in enumerate(bool_list) if fa==False])
             idx+=len(labels)
 
     print('prediction accuracy: ', total_correct / total_len)
@@ -262,6 +262,7 @@ if __name__=="__main__":
         tests_df = test_split(test_step, test_df)
 
         extract_df, p_under = extract_data(tests_df)
+
         test_df = pd.concat([test_df])
 
         extract_dataset = BinaryDataset(extract_df)
